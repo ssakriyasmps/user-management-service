@@ -42,11 +42,13 @@ public class RestResponseEntityExceptionHandler
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  HttpHeaders headers, HttpStatus status,
+                                                                  WebRequest request) {
         List<SpecificErrorDetails> specificErrorDetails = new ArrayList<>();
 
         ex.getBindingResult().getAllErrors().forEach((error) -> {
-            ErrorCode errorCode = ErrorCode.findByMessageKey(getMessageKey(error));
+            ErrorCode errorCode = ErrorCode.findByMessageKey(getValidationKey(error));
             String specificErrorMessage = getMessage(error, errorCode);
 
             specificErrorDetails.add(new SpecificErrorDetails(errorCode, specificErrorMessage));
@@ -62,7 +64,7 @@ public class RestResponseEntityExceptionHandler
                 ? error.getDefaultMessage() : errorCode.getMessage();
     }
 
-    private String getMessageKey(ObjectError error) {
+    private String getValidationKey(ObjectError error) {
        return new StringBuilder(error.getCode()).append(".").append(error.getObjectName()).append(".")
                .append(((FieldError) error).getField()).toString();
     }

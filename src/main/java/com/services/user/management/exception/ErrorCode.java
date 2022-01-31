@@ -21,10 +21,10 @@ public enum ErrorCode {
     ERTCUM0001("User not found", "");
 
     private static Map<String, ErrorCode> messageKeyErrorCodeMap = Arrays.stream(values())
-            .filter(errorCode -> StringUtils.isNotBlank(errorCode.validationType))
-            .collect(Collectors.toMap(ErrorCode::getValidationType, Function.identity()));
+            .filter(errorCode -> StringUtils.isNotBlank(errorCode.validationKey))
+            .collect(Collectors.toMap(ErrorCode::getValidationKey, Function.identity()));
     private String message;
-    private String validationType;
+    private String validationKey;
 
     public static ErrorCode findByMessageKey(String validationType){
         return messageKeyErrorCodeMap.get(validationType);
