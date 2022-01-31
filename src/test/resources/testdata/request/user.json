@@ -1,0 +1,10 @@
+{
+  "name": "Sam",
+  "age": 20,
+  "email": "sam@domain.com",
+  "phone": "777777777",
+  "socialMedia": [
+    "facebook",
+    "instagram"
+  ]
+}
