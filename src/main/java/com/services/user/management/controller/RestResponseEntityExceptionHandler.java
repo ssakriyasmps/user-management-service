@@ -48,7 +48,7 @@ public class RestResponseEntityExceptionHandler
         List<SpecificErrorDetails> specificErrorDetails = new ArrayList<>();
 
         ex.getBindingResult().getAllErrors().forEach((error) -> {
-            ErrorCode errorCode = ErrorCode.findByMessageKey(getValidationKey(error));
+            ErrorCode errorCode = ErrorCode.findByValidationKey(getValidationKey(error));
             String specificErrorMessage = getMessage(error, errorCode);
 
             specificErrorDetails.add(new SpecificErrorDetails(errorCode, specificErrorMessage));

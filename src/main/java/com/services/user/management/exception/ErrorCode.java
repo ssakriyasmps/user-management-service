@@ -26,7 +26,7 @@ public enum ErrorCode {
     private String message;
     private String validationKey;
 
-    public static ErrorCode findByMessageKey(String validationType){
+    public static ErrorCode findByValidationKey(String validationType){
         return messageKeyErrorCodeMap.get(validationType);
     }
 }
