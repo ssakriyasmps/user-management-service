@@ -3,7 +3,6 @@ package com.services.user.management.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.services.user.management.Application;
 import com.services.user.management.model.Subscription;
 import com.services.user.management.model.User;
@@ -18,7 +17,6 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -26,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,8 +34,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(classes = Application.class,
         webEnvironment = RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@WireMockTest(httpPort = 9112)
-public class UserManagementIntegrationTest {
+public class UserManagementMockBeanIntegrationTest {
 
     @LocalServerPort
     private int port;
@@ -48,18 +44,17 @@ public class UserManagementIntegrationTest {
 
     private String url;
 
+    @MockBean
+    SubscriptionClient subscriptionClient;
+
     @BeforeEach
     public void setup() {
         url = "http://localhost:" + port;
-
-        //Wiremock
-        Subscription subscription = new Subscription(1, Arrays.asList("facebook", "instagram"));
-        stubFor(get("/subscriptions/1").willReturn(jsonResponse(subscription, HttpStatus.OK.value())));
-        stubFor(post("/subscriptions").willReturn(ok()));
     }
 
     @Test
     public void givenAllUsersAreAvailable_WhenISendRequestToGetAllUsers_ThenIGetAllUsers() throws Exception {
+
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -78,6 +73,9 @@ public class UserManagementIntegrationTest {
     @Test
     public void givenAllUsersAreAvailable_WhenISendRequestToGetOneUser_ThenIGetOneUser()
             throws Exception {
+        Subscription subscription = new Subscription(1, Arrays.asList("facebook", "instagram"));
+        when(subscriptionClient.getSubscriptionsByUserId(1)).thenReturn(subscription);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(headers);
@@ -94,6 +92,10 @@ public class UserManagementIntegrationTest {
 
     @Test
     public void givenAllUsersAreAvailable_WhenISendPostRequest_ThenNewUserGetsAdded() throws Exception {
+
+        Subscription subscription = new Subscription(1, Arrays.asList("facebook", "instagram"));
+        when(subscriptionClient.getSubscriptionsByUserId(1)).thenReturn(subscription);
+        doNothing().when(subscriptionClient).addSubscriptions(subscription);
 
         String requestBodyJson = new String(Files.readAllBytes(Paths.get(getClass()
                 .getResource("/testdata/request/user.json").toURI())));

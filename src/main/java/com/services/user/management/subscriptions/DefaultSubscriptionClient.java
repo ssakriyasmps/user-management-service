@@ -35,16 +35,14 @@ public class DefaultSubscriptionClient implements SubscriptionClient {
         Map<String, Integer> params = new HashMap<>();
         params.put("userId", userId);
 
-//        ResponseEntity<Subscription> response = restTemplate.exchange(
-//                appProperties.getSubscriptionManagementServiceUrl() + getSubscriptionsURI,
-//                    HttpMethod.GET,
-//                    entity,
-//                    Subscription.class,
-//                    params);
-//
-//       return response.getBody();
+        ResponseEntity<Subscription> response = restTemplate.exchange(
+                appProperties.getSubscriptionManagementServiceUrl() + getSubscriptionsURI,
+                    HttpMethod.GET,
+                    entity,
+                    Subscription.class,
+                    params);
 
-        return new Subscription(userId, Arrays.asList("facebook", "instagram"));
+       return response.getBody();
     }
 
 
@@ -55,13 +53,12 @@ public class DefaultSubscriptionClient implements SubscriptionClient {
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<Subscription> entity = new HttpEntity<>(subscription, headers);
 
-//        ResponseEntity<Subscription> response = restTemplate.exchange(
-//                appProperties.getSubscriptionManagementServiceUrl()+addSubscriptionURI,
-//                    HttpMethod.POST,
-//                    entity,
-//                    Subscription.class);
+        ResponseEntity<Subscription> response = restTemplate.exchange(
+                appProperties.getSubscriptionManagementServiceUrl()+addSubscriptionURI,
+                    HttpMethod.POST,
+                    entity,
+                    Subscription.class);
 
         log.info("Added subscription {}", subscription);
-
     }
 }
