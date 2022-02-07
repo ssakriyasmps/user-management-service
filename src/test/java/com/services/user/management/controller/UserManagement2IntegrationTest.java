@@ -57,7 +57,7 @@ public class UserManagement2IntegrationTest {
 
         String requestBodyJson = new String(Files.readAllBytes(Paths.get(getClass()
                 .getResource("/testdata/request/subscription.json").toURI())));
-        Subscription subscription = new Subscription(1, Arrays.asList("facebook", "instagram"));
+        Subscription subscription = new Subscription("001000000000000000000500", Arrays.asList("facebook", "instagram"));
 
         subscriptionManagementService.stubFor(get(urlMatching("/subscriptions/.*"))
                 .willReturn(jsonResponse(subscription, HttpStatus.OK.value())));
@@ -89,7 +89,7 @@ public class UserManagement2IntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(headers);
-        ResponseEntity<User> response = rest.exchange(url+"/users/1",
+        ResponseEntity<User> response = rest.exchange(url+"/users/001000000000000000000500",
                 HttpMethod.GET, entity, new ParameterizedTypeReference<User>() {
                 });
 
@@ -116,7 +116,7 @@ public class UserManagement2IntegrationTest {
 
         headers.setContentType(MediaType.APPLICATION_JSON);
         entity = new HttpEntity<>(headers);
-        ResponseEntity<User> actualResponse = rest.exchange(url+"/users/1",
+        ResponseEntity<User> actualResponse = rest.exchange(url+"/users/001000000000000000000100",
                 HttpMethod.GET, entity, new ParameterizedTypeReference<User>() {
                 });
 

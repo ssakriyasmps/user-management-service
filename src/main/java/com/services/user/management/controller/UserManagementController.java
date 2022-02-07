@@ -26,7 +26,7 @@ public class UserManagementController {
 
     private Logger logger = LoggerFactory.getLogger(UserManagementController.class);
 
-    private static final String SUCCESS_CREATE_MESSAGE = "{\"message\" : \"Successfully created user\", \"id\": \"%d\"}";
+    private static final String SUCCESS_CREATE_MESSAGE = "{\"message\" : \"Successfully created user\", \"id\": \"%s\"}";
 
     @Autowired
     private UserManagementService userManagementService;
@@ -44,7 +44,7 @@ public class UserManagementController {
             value = {"/users/{userId}" },
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public User getUserById(final @PathVariable int userId) {
+    public User getUserById(final @PathVariable String userId) {
         logger.info("get user by id request");
         return userManagementService.getById(userId);
     }
@@ -55,7 +55,7 @@ public class UserManagementController {
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> addUser(final @Valid @RequestBody User user) {
         logger.info("add new user request {}", user);
-        int id = userManagementService.save(user);
+        String id = userManagementService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(String.format(SUCCESS_CREATE_MESSAGE, id));
     }

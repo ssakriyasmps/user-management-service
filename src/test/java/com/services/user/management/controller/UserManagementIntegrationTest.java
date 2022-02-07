@@ -2,23 +2,24 @@ package com.services.user.management.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.services.user.management.Application;
 import com.services.user.management.model.Subscription;
 import com.services.user.management.model.User;
-import com.services.user.management.subscriptions.SubscriptionClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -26,12 +27,14 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.jsonResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(classes = Application.class,
@@ -53,8 +56,9 @@ public class UserManagementIntegrationTest {
         url = "http://localhost:" + port;
 
         //Wiremock
-        Subscription subscription = new Subscription(1, Arrays.asList("facebook", "instagram"));
-        stubFor(get("/subscriptions/1").willReturn(jsonResponse(subscription, HttpStatus.OK.value())));
+        Subscription subscription = new Subscription("001000000000000000000100", Arrays.asList("facebook", "instagram"));
+        stubFor(get("/subscriptions/001000000000000000000100").willReturn(jsonResponse(subscription, HttpStatus.OK.value())));
+        stubFor(get("/subscriptions/001000000000000000000500").willReturn(jsonResponse(subscription, HttpStatus.OK.value())));
         stubFor(post("/subscriptions").willReturn(ok()));
     }
 
@@ -81,7 +85,7 @@ public class UserManagementIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(headers);
-        ResponseEntity<User> response = rest.exchange(url+"/users/1",
+        ResponseEntity<User> response = rest.exchange(url+"/users/001000000000000000000500",
                 HttpMethod.GET, entity, new ParameterizedTypeReference<User>() {
                 });
 
@@ -108,7 +112,7 @@ public class UserManagementIntegrationTest {
 
         headers.setContentType(MediaType.APPLICATION_JSON);
         entity = new HttpEntity<>(headers);
-        ResponseEntity<User> actualResponse = rest.exchange(url+"/users/1",
+        ResponseEntity<User> actualResponse = rest.exchange(url+"/users/001000000000000000000100",
                 HttpMethod.GET, entity, new ParameterizedTypeReference<User>() {
                 });
 

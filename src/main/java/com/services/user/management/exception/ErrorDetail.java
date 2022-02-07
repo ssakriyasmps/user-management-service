@@ -13,9 +13,9 @@ import java.util.List;
 public class ErrorDetail {
     private GenericErrorCode code;
     private String message;
-    private List<SpecificErrorDetails> errorMessages;
+    private List<SpecificErrorDetail> errorMessages;
 
-    public ErrorDetail(GenericErrorCode code, List<SpecificErrorDetails> errorMessages){
+    public ErrorDetail(GenericErrorCode code, List<SpecificErrorDetail> errorMessages){
         this.code = code;
         this.message = code.getMessage();
         this.errorMessages = errorMessages;

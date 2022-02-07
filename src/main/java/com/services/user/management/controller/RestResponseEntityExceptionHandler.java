@@ -32,7 +32,7 @@ public class RestResponseEntityExceptionHandler
     protected ResponseEntity<Object> handleUserNotFoundException(
             UserNotFound ex, WebRequest request) {
 
-        List<SpecificErrorDetails> specificErrorDetails = Arrays.asList(new SpecificErrorDetails(ex.getErrorCode(),
+        List<SpecificErrorDetail> specificErrorDetails = Arrays.asList(new SpecificErrorDetail(ex.getErrorCode(),
                                                                         ex.getMessage()));
 
         ErrorDetail errorDetail = new ErrorDetail(GenericErrorCode.DataNotFound, specificErrorDetails);
@@ -45,13 +45,15 @@ public class RestResponseEntityExceptionHandler
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatus status,
                                                                   WebRequest request) {
-        List<SpecificErrorDetails> specificErrorDetails = new ArrayList<>();
+        List<SpecificErrorDetail> specificErrorDetails = new ArrayList<>();
 
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             ErrorCode errorCode = ErrorCode.findByValidationKey(getValidationKey(error));
             String specificErrorMessage = getMessage(error, errorCode);
 
-            specificErrorDetails.add(new SpecificErrorDetails(errorCode, specificErrorMessage));
+            specificErrorDetails.add(new SpecificErrorDetail(errorCode,
+                    specificErrorMessage,
+                    error.getObjectName()));
         });
 
         ErrorDetail errorDetail = new ErrorDetail(GenericErrorCode.InvalidRequest, specificErrorDetails);

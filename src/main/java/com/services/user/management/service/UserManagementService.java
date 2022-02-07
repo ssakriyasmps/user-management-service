@@ -29,10 +29,10 @@ public class UserManagementService {
     @Autowired
     SubscriptionClient subscriptionClient;
 
-    public int save(final User user) {
+    public String save(final User user) {
         logger.info("start saving user & subscriptions {}", user);
         UserEntity userEntity = toEntity(user);
-        int userId = repository.save(userEntity).getId();
+        String userId = repository.save(userEntity).getId();
         if (!CollectionUtils.isEmpty(user.getSocialMedia())) {
             subscriptionClient.addSubscriptions(new Subscription(userId, user.getSocialMedia()));
         }
@@ -49,7 +49,7 @@ public class UserManagementService {
         repository.saveAll(entities);
     }
 
-    public User getById(int userId) {
+    public User getById(String userId) {
 
         if(!repository.findById(userId).isPresent()) {
             throw new UserNotFound(ErrorCode.ERTCUM0001);

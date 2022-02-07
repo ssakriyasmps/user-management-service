@@ -10,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Subscription {
-    private int userId;
+    private String userId;
     private List<String> socialMedia;
 }

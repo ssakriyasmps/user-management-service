@@ -2,7 +2,6 @@ package com.services.user.management.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.services.user.management.Application;
 import com.services.user.management.model.Subscription;
 import com.services.user.management.model.User;
@@ -15,7 +14,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.net.URL;
@@ -73,13 +77,13 @@ public class UserManagementMockBeanIntegrationTest {
     @Test
     public void givenAllUsersAreAvailable_WhenISendRequestToGetOneUser_ThenIGetOneUser()
             throws Exception {
-        Subscription subscription = new Subscription(1, Arrays.asList("facebook", "instagram"));
-        when(subscriptionClient.getSubscriptionsByUserId(1)).thenReturn(subscription);
+        Subscription subscription = new Subscription("001000000000000000000500", Arrays.asList("facebook", "instagram"));
+        when(subscriptionClient.getSubscriptionsByUserId("001000000000000000000500")).thenReturn(subscription);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(headers);
-        ResponseEntity<User> response = rest.exchange(url+"/users/1",
+        ResponseEntity<User> response = rest.exchange(url+"/users/001000000000000000000500",
                 HttpMethod.GET, entity, new ParameterizedTypeReference<User>() {
                 });
 
@@ -93,8 +97,8 @@ public class UserManagementMockBeanIntegrationTest {
     @Test
     public void givenAllUsersAreAvailable_WhenISendPostRequest_ThenNewUserGetsAdded() throws Exception {
 
-        Subscription subscription = new Subscription(1, Arrays.asList("facebook", "instagram"));
-        when(subscriptionClient.getSubscriptionsByUserId(1)).thenReturn(subscription);
+        Subscription subscription = new Subscription("001000000000000000000100", Arrays.asList("facebook", "instagram"));
+        when(subscriptionClient.getSubscriptionsByUserId("001000000000000000000100")).thenReturn(subscription);
         doNothing().when(subscriptionClient).addSubscriptions(subscription);
 
         String requestBodyJson = new String(Files.readAllBytes(Paths.get(getClass()
@@ -110,7 +114,7 @@ public class UserManagementMockBeanIntegrationTest {
 
         headers.setContentType(MediaType.APPLICATION_JSON);
         entity = new HttpEntity<>(headers);
-        ResponseEntity<User> actualResponse = rest.exchange(url+"/users/1",
+        ResponseEntity<User> actualResponse = rest.exchange(url+"/users/001000000000000000000100",
                 HttpMethod.GET, entity, new ParameterizedTypeReference<User>() {
                 });
 

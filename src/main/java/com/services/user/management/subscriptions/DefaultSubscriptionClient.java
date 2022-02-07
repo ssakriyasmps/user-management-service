@@ -4,12 +4,14 @@ import com.services.user.management.configuration.AppProperties;
 import com.services.user.management.model.Subscription;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,12 +29,12 @@ public class DefaultSubscriptionClient implements SubscriptionClient {
     private final String addSubscriptionURI = "/subscriptions";
 
     @Override
-    public Subscription getSubscriptionsByUserId(int userId) {
+    public Subscription getSubscriptionsByUserId(String userId) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<?> entity = new HttpEntity<>(headers);
-        Map<String, Integer> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
         params.put("userId", userId);
 
         ResponseEntity<Subscription> response = restTemplate.exchange(
