@@ -3,10 +3,12 @@ package com.services.user.management.subscriptions;
 import com.services.user.management.configuration.AppProperties;
 import com.services.user.management.model.Subscription;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -67,12 +69,24 @@ public class DefaultSubscriptionClient implements SubscriptionClient {
 //                .flatMap(i -> getSubscription(i, userId, context))
 //                .doOnTerminate(() -> System.out.println(context))
 //                .blockLast();
-        Flux.range(1,5)
-                .parallel()
-                .flatMap(i -> getSubscription(i, userId, context))
-                .sequential()
+//        Flux.range(1,5)
+//                .parallel()
+//                .flatMap(i -> getSubscription(i, userId, context))
+//                .sequential()
+//                .doOnNext(subscription -> {
+//                    socialMediaList.addAll(subscription.getSocialMedia());
+//                })
+//                .blockLast();
+        Flux.range(1,2)
+                .concatMap(i -> getSubscription(i, userId, context))
                 .doOnNext(subscription -> {
                     socialMediaList.addAll(subscription.getSocialMedia());
+                })
+                .retry(2)
+                .onErrorResume((ex) -> {
+                    log.error("Error processing [ "+userId+" ] :", ex);
+                    context.put("", "Failed");
+                    return Mono.empty();
                 })
                 .blockLast();
 
@@ -93,14 +107,23 @@ public class DefaultSubscriptionClient implements SubscriptionClient {
 //                .flatMap(i -> getSubscription(i, userId, context))
 //                .doOnTerminate(() -> System.out.println(context))
 //                .blockLast();
+//        Flux.fromIterable(userId)
+//                .parallel()
+//                .flatMap(id -> getSubscription(id, context))
+//                .sequential()
+//                .doOnNext(subscription -> {
+//                    subscriptionList.put(subscription.getUserId(), subscription);
+//                })
+//
+//                .blockLast();
         Flux.fromIterable(userId)
-                .parallel()
-                .flatMap(id -> getSubscription(id, context))
-                .sequential()
+                .concatMap(id -> getSubscription(id, context))
                 .doOnNext(subscription -> {
                     subscriptionList.put(subscription.getUserId(), subscription);
                 })
-                .blockLast();
+                .retry(2)
+               .blockLast();
+
 
         System.out.println("Got [" +userId.size()+ "] [" +subscriptionList.size()+ ", response received ["+ context.size() +" ]: "+context);
 
@@ -113,16 +136,15 @@ public class DefaultSubscriptionClient implements SubscriptionClient {
         Mono<Subscription> subscriptionMono =  client.get()
                 .uri(getSubscriptionsURI, userId)
                 .retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        response -> {
+                            log.info(i+" Response from subscription : "+response.toString());
+                            return Mono.error(new ServiceException("Server error: "+response.statusCode()));
+                })
                 .bodyToMono(Subscription.class)
                 .doOnSuccess(subscription -> {
                     context.put(""+i, "Success");
-                    System.out.println("Result: Success"+i);
-                })
-                .retry(2)
-                .onErrorResume((ex) -> {
-//                    log.error("Error processing [ "+i+" ] :", ex);
-                    context.put(""+i, "Failed");
-                    return Mono.empty();
+                    log.info("Result: Success"+i);
                 });
 
         return subscriptionMono;
